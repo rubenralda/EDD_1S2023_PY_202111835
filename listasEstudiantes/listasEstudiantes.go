@@ -6,9 +6,16 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var ConteoPendientes int = 0
+
+type bitacoraEstudiante struct {
+	fecha     string
+	hora      string
+	siguiente *bitacoraEstudiante
+}
 
 type NodoStudiante struct {
 	siguiente *NodoStudiante
@@ -16,6 +23,27 @@ type NodoStudiante struct {
 	carnet    int32
 	Nombre    string
 	pass      string
+	primeroB  *bitacoraEstudiante
+	ultimoB   *bitacoraEstudiante
+}
+
+func (estudiante *NodoStudiante) ApilarBitacora() {
+	d := time.TimeOnly
+	f := time.DateOnly
+	nuevo := bitacoraEstudiante{fecha: f, siguiente: nil, hora: d}
+	if estudiante.primeroB == nil {
+		estudiante.primeroB = &nuevo
+		estudiante.ultimoB = &nuevo
+	} else {
+		estudiante.ultimoB.siguiente = &nuevo
+		estudiante.ultimoB = &nuevo
+	}
+}
+func (actual NodoStudiante) Mostrar() {
+	for actual.primeroB != nil {
+		fmt.Println("---Fecha:", actual.primeroB.fecha, actual.primeroB.hora)
+		actual.primeroB = actual.primeroB.siguiente
+	}
 }
 
 type ColaPendientes struct {
@@ -49,10 +77,9 @@ func (estudiante *ColaPendientes) CargaMasiva(NombreArchivo string) string {
 		}
 		carnet, err := strconv.ParseInt(dato[0], 0, 32)
 		if err != nil {
-			fmt.Println(err)
 			return "El carnet " + dato[0] + " no es correcto"
 		}
-		estudiante.Agregar(int32(carnet), dato[1], dato[2])
+		estudiante.Agregar(int32(carnet), strings.Trim(strings.TrimSpace(dato[1]), "\n"), strings.Trim(strings.TrimSpace(dato[2]), "\n"))
 	}
 	return "Se ha cargado el archivo con éxito"
 }
@@ -73,7 +100,7 @@ func (estudiante *ColaPendientes) EliminarPrimero() *NodoStudiante {
 
 func (estudiantes ColaPendientes) Mostrar() {
 	for estudiantes.Primero != nil {
-		fmt.Print("-->", ConteoPendientes, estudiantes.Primero.Nombre)
+		fmt.Print("-->", estudiantes.Primero.Nombre)
 		estudiantes.Primero = estudiantes.Primero.siguiente
 	}
 }
@@ -88,7 +115,6 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 		lista.Primero = estudiante
 		lista.Ultimo = estudiante
 		lista.Primero.siguiente = nil
-		fmt.Println("Entro aqui 1")
 		return
 	}
 	if lista.Primero.carnet > estudiante.carnet {
@@ -96,7 +122,6 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 		lista.Primero.anterior = estudiante
 		estudiante.anterior = nil
 		lista.Primero = estudiante
-		fmt.Println("Entro aqui 2")
 		return
 	}
 	for actual := lista.Primero; actual != nil; {
@@ -106,7 +131,6 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 				estudiante.siguiente = nil
 				estudiante.anterior = lista.Ultimo
 				actual = estudiante
-				fmt.Println("Entro aqui 2")
 			} else {
 				estudiante.siguiente = lista.Ultimo
 				estudiante.anterior = lista.Ultimo.anterior
@@ -122,22 +146,70 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 				actual.siguiente.anterior = estudiante
 				actual.siguiente = estudiante
 				estudiante.anterior = actual
-				fmt.Println("Entro aqui 3")
 				break
 			}
 		}
-		fmt.Println("Entro aqui 4")
 		actual = actual.siguiente
 	}
 }
 
-func (estudiantes ListaAceptados) Mostrar() {
+func (lista *ListaAceptados) IniciarSesión(carnet int32, pass string) {
+	for actual := lista.Primero; actual != nil; {
+		if actual.carnet == carnet {
+			if actual.pass == pass {
+				actual.ApilarBitacora()
+				fmt.Println("SESIÓN INICIADA CORRECTAMENTE")
+				fmt.Println("Nombre:", actual.Nombre)
+				fmt.Println("Se inició sesión:")
+				actual.Mostrar()
+				return
+			} else {
+				fmt.Println("La contraseña es incorrecta")
+				return
+			}
+		}
+		actual = actual.siguiente
+	}
+	fmt.Println("El usuario no existe")
+}
+
+func (estudiantes ListaAceptados) Listado() {
+	fmt.Println("\n*********** Listado de estudiantes *************")
 	for estudiantes.Primero != nil {
-		fmt.Print("-->", ConteoPendientes, estudiantes.Primero.Nombre)
+		fmt.Println("Nombre:", estudiantes.Primero.Nombre, "Carnet:", estudiantes.Primero.carnet)
+		fmt.Println("**************************************************")
 		estudiantes.Primero = estudiantes.Primero.siguiente
 	}
 }
 
-type BitacoraAdmin struct {
-	mensaje string
+type nodoBitacoraAdmin struct {
+	mensaje   string
+	fecha     string
+	hora      string
+	siguiente *nodoBitacoraAdmin
+}
+
+type PilaAdmin struct {
+	Primero *nodoBitacoraAdmin
+	Ultimo  *nodoBitacoraAdmin
+}
+
+func (bitacora *PilaAdmin) Agregar(mensaje string) {
+	h := time.TimeOnly
+	f := time.DateOnly
+	nuevo := nodoBitacoraAdmin{mensaje: mensaje, fecha: f, hora: h, siguiente: nil}
+	if bitacora.Primero == nil {
+		bitacora.Primero = &nuevo
+		bitacora.Ultimo = &nuevo
+	} else {
+		bitacora.Ultimo.siguiente = &nuevo
+		bitacora.Ultimo = &nuevo
+	}
+}
+
+func (bitacora PilaAdmin) Mostrar() {
+	for bitacora.Primero != nil {
+		fmt.Println(bitacora.Primero.mensaje)
+		bitacora.Primero = bitacora.Primero.siguiente
+	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"ruben.info/proyecto1/listasEstudiantes"
 )
@@ -10,11 +11,12 @@ func main() {
 	fmt.Println("Hola")
 	colaPendientes := listasEstudiantes.ColaPendientes{}
 	aceptados := listasEstudiantes.ListaAceptados{}
-	for i := 0; i != 2; {
+	bitacoraAdmin := listasEstudiantes.PilaAdmin{}
+	for i := 0; i != 3; {
 		fmt.Println("\n********************** EDD Drive *******************************")
 		fmt.Println("1. Iniciar sesión")
-		fmt.Println("2. Salir del sistema")
-		fmt.Println("3. Mostrar Reportes")
+		fmt.Println("2. Mostrar Reportes")
+		fmt.Println("3. Salir del sistema")
 		fmt.Println("****************************************************************")
 		fmt.Print("Elige una opcion: ")
 		fmt.Scan(&i)
@@ -25,18 +27,26 @@ func main() {
 			fmt.Print("Ingresa tu contraseña: ")
 			fmt.Scan(&pass)
 			if usuario == "admin" && pass == "admin" {
-				menuAdmin(&colaPendientes, &aceptados)
+				fmt.Println("SESIÓN INICIADA COMO ADMINISTRADOR")
+				menuAdmin(&colaPendientes, &aceptados, &bitacoraAdmin)
+			} else {
+				carnet, err := strconv.ParseInt(usuario, 0, 32)
+				if err != nil {
+					fmt.Println("El usuario no es válido, verifique que sea un número de carnet")
+					continue
+				}
+				aceptados.IniciarSesión(int32(carnet), pass)
 			}
-		case 2:
-			fmt.Println("Adios")
 		case 3:
+			fmt.Println("Adios")
+		case 2:
 		default:
 			fmt.Println("Ingresa una opción valida")
 		}
 	}
 }
 
-func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *listasEstudiantes.ListaAceptados) {
+func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *listasEstudiantes.ListaAceptados, bitacora *listasEstudiantes.PilaAdmin) {
 	for x := 0; x != 5; {
 		fmt.Println("\n*********** Dashboard Administrador - EDD GoDrive *************")
 		fmt.Println("1. Ver estudiantes pendientes")
@@ -50,7 +60,9 @@ func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *list
 
 		switch x {
 		case 1:
-			MenuPendientes(aceptados, colaPendientes)
+			MenuPendientes(aceptados, colaPendientes, bitacora)
+		case 2:
+			aceptados.Listado()
 		case 3:
 			var carnet int32
 			var nombre, pass string
@@ -78,10 +90,11 @@ func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *list
 	}
 }
 
-func MenuPendientes(aceptados *listasEstudiantes.ListaAceptados, pendientes *listasEstudiantes.ColaPendientes) {
+func MenuPendientes(aceptados *listasEstudiantes.ListaAceptados, pendientes *listasEstudiantes.ColaPendientes, bitacora *listasEstudiantes.PilaAdmin) {
 	for i := 0; i != 3; {
 		if listasEstudiantes.ConteoPendientes == 0 {
-			fmt.Println("No hay estudiantes pendientes en la cola")
+			fmt.Println("-----No hay estudiantes pendientes en la cola----")
+			bitacora.Mostrar()
 			return
 		}
 		fmt.Println("\n*********** Pendientes:", listasEstudiantes.ConteoPendientes, "- EDD GoDrive *************")
@@ -96,18 +109,21 @@ func MenuPendientes(aceptados *listasEstudiantes.ListaAceptados, pendientes *lis
 			eliminado := pendientes.EliminarPrimero()
 			if eliminado != nil {
 				aceptados.Agregar(eliminado)
-				aceptados.Mostrar()
-				println("\nPendientes:")
+				bitacora.Agregar("Se aceptó a " + eliminado.Nombre)
+				//quitar este mostrar
 				pendientes.Mostrar()
 			}
 		case 2:
-			pendientes.EliminarPrimero()
-			aceptados.Mostrar()
-			println("\nPendientes:")
+			eliminado := pendientes.EliminarPrimero()
+			bitacora.Agregar("Se rechazó a " + eliminado.Nombre)
 			pendientes.Mostrar()
 		case 3:
 		default:
 			fmt.Println("Ingresa una opción válida")
 		}
 	}
+}
+
+func menuEstudiante() {
+
 }
