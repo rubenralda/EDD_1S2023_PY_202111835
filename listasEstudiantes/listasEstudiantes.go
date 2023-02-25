@@ -2,8 +2,10 @@ package listasEstudiantes
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -28,9 +30,9 @@ type NodoStudiante struct {
 }
 
 func (estudiante *NodoStudiante) ApilarBitacora() {
-	d := time.TimeOnly
-	f := time.DateOnly
-	nuevo := bitacoraEstudiante{fecha: f, siguiente: nil, hora: d}
+	h := time.Now().Format(time.TimeOnly)
+	f := time.Now().Format(time.DateOnly)
+	nuevo := bitacoraEstudiante{fecha: f, siguiente: nil, hora: h}
 	if estudiante.primeroB == nil {
 		estudiante.primeroB = &nuevo
 		estudiante.ultimoB = &nuevo
@@ -96,6 +98,54 @@ func (estudiante *ColaPendientes) EliminarPrimero() *NodoStudiante {
 	ConteoPendientes--
 	aux.siguiente = nil
 	return aux
+}
+
+func (estudiante *ColaPendientes) report() string {
+	if estudiante.Ultimo == nil {
+		return ""
+	}
+	aux := estudiante.Primero
+	conexion := ""
+	text := ""
+	text += "rankdir=LR; \n "
+	text += "node[shape=component, style=filled, color=skyBlue, fontname=\"Century Gothic\"]; \n "
+	text += "graph [fontname=\"Century Gothic\"]; \n "
+	text += "labelloc=\"t\"; label=\"Estudiantes en espera de ser aceptados\"; \n"
+	i := 0
+	for {
+		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
+		conexion += strconv.FormatInt(int64(i), 10)
+		aux = aux.siguiente
+		if aux == nil {
+			break
+		}
+		i++
+		conexion += " -> "
+	}
+	text += conexion
+	return text
+}
+
+func (estudiante ColaPendientes) CrearReporte() {
+	contenido := "digraph G{\n\n"
+	fichero, err := os.Create("./textos/colaPendientes.dot")
+	if err != nil {
+		fmt.Println(err, "Hubo un error al crear el archivo")
+		return
+	}
+	defer fichero.Close()
+	contenido += estudiante.report()
+	contenido += "\n}"
+	if _, err = fichero.Write([]byte(contenido)); err != nil {
+		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		return
+	}
+	if estudiante.Primero != nil {
+		path, _ := exec.LookPath("dot")
+		cmd, _ := exec.Command(path, "-Tjpg", "-Gcharset=latin1", "./textos/colaPendientes.dot").Output()
+		mode := 0777
+		_ = ioutil.WriteFile("colaPendientes.png", cmd, os.FileMode(mode))
+	}
 }
 
 func (estudiantes ColaPendientes) Mostrar() {
@@ -173,6 +223,83 @@ func (lista *ListaAceptados) IniciarSesión(carnet int32, pass string) {
 	fmt.Println("El usuario no existe")
 }
 
+func (estudiante *ListaAceptados) report() string {
+	if estudiante.Ultimo == nil {
+		return ""
+	}
+	aux := estudiante.Primero
+	conexion := "nodonull1->"
+	bitacora := "\n"
+	conexionPila := ""
+	conexionEnlaza := ";"
+	text := ""
+	rank := ""
+	text += "rankdir=LR; \n "
+	text += "node[shape=component, style=filled, color=skyBlue, fontname=\"Century Gothic\"]; \n "
+	text += "graph [fontname=\"Century Gothic\"]; \n "
+	text += "labelloc=\"t\"; label=\"Estudiantes en el sistema\"; \n"
+	text += "nodonull1[label=\"null\"];\n"
+	text += "nodonull2[label=\"null\"];\n"
+	i := 0
+	x := 0
+	for {
+		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
+		conexion += strconv.FormatInt(int64(i), 10)
+		conexionEnlaza = strconv.FormatInt(int64(i), 10) + conexionEnlaza
+		auxBitacora := aux.primeroB
+		if auxBitacora != nil {
+			conexionPila += strconv.FormatInt(int64(i), 10) + " -> "
+			rank += "{rank=same;" + strconv.FormatInt(int64(i), 10) + ","
+			for {
+				bitacora += "n" + strconv.FormatInt(int64(x), 10) + "[label=\"Se inició sesión\\n" + auxBitacora.fecha + "  " + auxBitacora.hora + "\"]\n"
+				conexionPila += "n" + strconv.FormatInt(int64(x), 10)
+				rank += "n" + strconv.FormatInt(int64(x), 10)
+				x++
+				auxBitacora = auxBitacora.siguiente
+				if auxBitacora == nil {
+					break
+				}
+
+				conexionPila += " -> "
+				rank += ","
+			}
+			conexionPila += ";\n"
+			rank += "}\n"
+		}
+		i++
+		aux = aux.siguiente
+		if aux == nil {
+			break
+		}
+		conexion += " -> "
+		conexionEnlaza = " -> " + conexionEnlaza
+	}
+	text += conexion + "->nodonull2;\n" + conexionEnlaza + bitacora + conexionPila + rank
+	return text
+}
+
+func (estudiante ListaAceptados) CrearReporte() {
+	contenido := "digraph G{\n\n"
+	fichero, err := os.Create("./textos/aceptados.dot")
+	if err != nil {
+		fmt.Println(err, "Hubo un error al crear el archivo")
+		return
+	}
+	defer fichero.Close()
+	contenido += estudiante.report()
+	contenido += "\n}"
+	if _, err = fichero.Write([]byte(contenido)); err != nil {
+		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		return
+	}
+	if estudiante.Primero != nil {
+		path, _ := exec.LookPath("dot")
+		cmd, _ := exec.Command(path, "-Tjpg", "-Gcharset=latin1", "./textos/aceptados.dot").Output()
+		mode := 0777
+		_ = ioutil.WriteFile("aceptados.png", cmd, os.FileMode(mode))
+	}
+}
+
 func (estudiantes ListaAceptados) Listado() {
 	fmt.Println("\n*********** Listado de estudiantes *************")
 	for estudiantes.Primero != nil {
@@ -195,8 +322,8 @@ type PilaAdmin struct {
 }
 
 func (bitacora *PilaAdmin) Agregar(mensaje string) {
-	h := time.TimeOnly
-	f := time.DateOnly
+	h := time.Now().Format(time.TimeOnly)
+	f := time.Now().Format(time.DateOnly)
 	nuevo := nodoBitacoraAdmin{mensaje: mensaje, fecha: f, hora: h, siguiente: nil}
 	if bitacora.Primero == nil {
 		bitacora.Primero = &nuevo
@@ -204,6 +331,54 @@ func (bitacora *PilaAdmin) Agregar(mensaje string) {
 	} else {
 		bitacora.Ultimo.siguiente = &nuevo
 		bitacora.Ultimo = &nuevo
+	}
+}
+
+func (bitacora *PilaAdmin) report() string {
+	if bitacora.Ultimo == nil {
+		return ""
+	}
+	aux := bitacora.Primero
+	conexion := ""
+	text := ""
+	text += "rankdir=TB; \n "
+	text += "node[shape=cds, style=filled, color=pink, fontname=\"Century Gothic\"]; \n "
+	text += "graph [fontname=\"Century Gothic\"]; \n "
+	text += "labelloc=\"t\"; label=\"Bitacora Administrador\"; \n"
+	i := 0
+	for {
+		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + aux.mensaje + "\\n" + aux.fecha + "  " + aux.hora + "\"]\n"
+		conexion += strconv.FormatInt(int64(i), 10)
+		aux = aux.siguiente
+		if aux == nil {
+			break
+		}
+		i++
+		conexion += " -> "
+	}
+	text += conexion
+	return text
+}
+
+func (bitacora PilaAdmin) CrearReporte() {
+	contenido := "digraph G{\n\n"
+	fichero, err := os.Create("./textos/bitacoraAdmin.dot")
+	if err != nil {
+		fmt.Println(err, "Hubo un error al crear el archivo")
+		return
+	}
+	defer fichero.Close()
+	contenido += bitacora.report()
+	contenido += "\n}"
+	if _, err = fichero.Write([]byte(contenido)); err != nil {
+		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		return
+	}
+	if bitacora.Primero != nil {
+		path, _ := exec.LookPath("dot")
+		cmd, _ := exec.Command(path, "-Tjpg", "-Gcharset=latin1", "./textos/bitacoraAdmin.dot").Output()
+		mode := 0777
+		_ = ioutil.WriteFile("bitacoraAdmin.png", cmd, os.FileMode(mode))
 	}
 }
 

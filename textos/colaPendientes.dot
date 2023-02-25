@@ -1,0 +1,10 @@
+digraph G{
+
+rankdir=LR; 
+ node[shape=component, style=filled, color=skyBlue, fontname="Century Gothic"]; 
+ graph [fontname="Century Gothic"]; 
+ labelloc="t"; label="Estudiantes en espera de ser aceptados"; 
+0[label="200577021\nMaría pérez"]
+1[label="201654868\nJosue"]
+0 -> 1
+}

@@ -40,6 +40,9 @@ func main() {
 		case 3:
 			fmt.Println("Adios")
 		case 2:
+			bitacoraAdmin.CrearReporte()
+			colaPendientes.CrearReporte()
+			aceptados.CrearReporte()
 		default:
 			fmt.Println("Ingresa una opción valida")
 		}
