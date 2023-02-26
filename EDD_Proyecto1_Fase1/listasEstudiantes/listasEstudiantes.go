@@ -317,14 +317,13 @@ func (list ListaAceptados) ToSlice() []interface{} {
 	return values
 }
 
-type estructura struct {
-	Alumnos []interface{}
-}
-
 func (list ListaAceptados) ToJSON() ([]byte, error) {
+	type estructura struct {
+		Alumnos []interface{}
+	}
 	values := list.ToSlice()
-	estructura := estructura{Alumnos: values}
-	return json.Marshal(estructura)
+	estruct := estructura{Alumnos: values}
+	return json.Marshal(estruct)
 }
 
 func (estudiante ListaAceptados) ReporteJson() {

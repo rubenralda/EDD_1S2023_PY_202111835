@@ -1,16 +1,1 @@
-{
-    "Alumnos":[
-        {
-            "Carnet":201403877,"Nombre":"Ebany Larios","Pass":"qwerty12"
-        },
-        {
-            "Carnet":201709018,"Nombre":"Cristian Suy","Pass":"cris1234"
-        },
-        {
-            "Carnet":201780044,"Nombre":"Leonardo Martinez","Pass":"leo1234"
-        },
-        {
-            "Carnet":202111835,"Nombre":"Rubén Ralda","Pass":"ekcigid"
-        }
-    ]
-}
+{"Alumnos":[{"Carnet":201709018,"Nombre":"Cristian Suy","Pass":"cris1234"},{"Carnet":201780044,"Nombre":"Leonardo Martinez","Pass":"leo1234"},{"Carnet":201955646,"Nombre":"Jorge Méndez","Pass":"trigovbnn"},{"Carnet":202111835,"Nombre":"Rubén Ralda","Pass":"ekcigid"}]}

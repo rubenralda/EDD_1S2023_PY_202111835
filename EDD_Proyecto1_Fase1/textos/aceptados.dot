@@ -6,11 +6,14 @@ rankdir=LR;
  labelloc="t"; label="Estudiantes en el sistema"; 
 nodonull1[label="NULL"];
 nodonull2[label="NULL"];
-0[label="201403877\nEbany Larios"]
-1[label="201709018\nCristian Suy"]
-2[label="201780044\nLeonardo Martinez"]
+0[label="201709018\nCristian Suy"]
+1[label="201780044\nLeonardo Martinez"]
+2[label="201955646\nJorge Méndez"]
 3[label="202111835\nRubén Ralda"]
 nodonull1->0 -> 1 -> 2 -> 3->nodonull2;
 3 -> 2 -> 1 -> 0;
+n0[label="Se inició sesión\n2023-02-25  22:27:08"]
+3 -> n0;
+{rank=same;3,n0}
 
 }
