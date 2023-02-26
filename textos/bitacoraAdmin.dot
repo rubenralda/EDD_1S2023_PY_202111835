@@ -4,11 +4,10 @@ rankdir=TB;
  node[shape=cds, style=filled, color=pink, fontname="Century Gothic"]; 
  graph [fontname="Century Gothic"]; 
  labelloc="t"; label="Bitacora Administrador"; 
-0[label="Se rechazó a Leonardo Martinez\n2023-02-24  21:40:58"]
-1[label="Se aceptó a Cristian Suy\n2023-02-24  21:41:00"]
-2[label="Se rechazó a Ebany Larios\n2023-02-24  21:41:02"]
-3[label="Se aceptó a Rubén Ralda\n2023-02-24  21:41:03"]
-4[label="Se aceptó a Emily de León\n2023-02-24  21:41:03"]
-5[label="Se aceptó a Jorge Méndez\n2023-02-24  21:41:06"]
-0 -> 1 -> 2 -> 3 -> 4 -> 5
+0[label="Se aceptó a Leonardo Martinez\n2023-02-25  19:54:05"]
+1[label="Se aceptó a Cristian Suy\n2023-02-25  19:54:06"]
+2[label="Se aceptó a Ebany Larios\n2023-02-25  19:54:06"]
+3[label="Se aceptó a Rubén Ralda\n2023-02-25  19:54:07"]
+4[label="Se rechazó a Emily de León\n2023-02-25  19:54:08"]
+0 -> 1 -> 2 -> 3 -> 4
 }

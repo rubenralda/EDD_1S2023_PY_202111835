@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Hola")
 	colaPendientes := listasEstudiantes.ColaPendientes{}
 	aceptados := listasEstudiantes.ListaAceptados{}
 	bitacoraAdmin := listasEstudiantes.PilaAdmin{}
@@ -27,12 +26,12 @@ func main() {
 			fmt.Print("Ingresa tu contraseña: ")
 			fmt.Scan(&pass)
 			if usuario == "admin" && pass == "admin" {
-				fmt.Println("SESIÓN INICIADA COMO ADMINISTRADOR")
+				fmt.Println("\nSESIÓN INICIADA COMO ADMINISTRADOR")
 				menuAdmin(&colaPendientes, &aceptados, &bitacoraAdmin)
 			} else {
 				carnet, err := strconv.ParseInt(usuario, 0, 32)
 				if err != nil {
-					fmt.Println("El usuario no es válido, verifique que sea un número de carnet")
+					fmt.Println("\nError: El usuario no es válido, verifique que sea un número de carnet")
 					continue
 				}
 				aceptados.IniciarSesión(int32(carnet), pass)
@@ -43,8 +42,9 @@ func main() {
 			bitacoraAdmin.CrearReporte()
 			colaPendientes.CrearReporte()
 			aceptados.CrearReporte()
+			aceptados.ReporteJson()
 		default:
-			fmt.Println("Ingresa una opción valida")
+			fmt.Println("\n------Advertencia: Ingresa una opción válida------")
 		}
 	}
 }
@@ -77,18 +77,17 @@ func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *list
 			fmt.Print("Ingresa una Contraseña: ")
 			fmt.Scan(&pass)
 			colaPendientes.Agregar(carnet, nombre, pass)
-			colaPendientes.Mostrar()
+			fmt.Println("\n-------Estudiante agregado a la cola de pendientes-------")
 		case 4:
-			fmt.Println("\n*********** Carga masiva - EDD GoDrive *************")
+			fmt.Println("\n*********** Registro de estudiantes - EDD GoDrive *************")
 			fmt.Print("Ingresa el nombre del archivo(en el mismo directorio): ")
 			var nombreArchivo string
 			fmt.Scan(&nombreArchivo)
 			fmt.Println(colaPendientes.CargaMasiva(nombreArchivo))
-			colaPendientes.Mostrar()
 		case 5:
-			fmt.Println("Sesión cerrada")
+			fmt.Println("\n------Sesión cerrada------")
 		default:
-			fmt.Println("Ingresa una opcion válida")
+			fmt.Println("\n------Advertencia: Ingresa una opción válida------")
 		}
 	}
 }
@@ -96,8 +95,7 @@ func menuAdmin(colaPendientes *listasEstudiantes.ColaPendientes, aceptados *list
 func MenuPendientes(aceptados *listasEstudiantes.ListaAceptados, pendientes *listasEstudiantes.ColaPendientes, bitacora *listasEstudiantes.PilaAdmin) {
 	for i := 0; i != 3; {
 		if listasEstudiantes.ConteoPendientes == 0 {
-			fmt.Println("-----No hay estudiantes pendientes en la cola----")
-			bitacora.Mostrar()
+			fmt.Println("\n-----No hay estudiantes pendientes en la cola----")
 			return
 		}
 		fmt.Println("\n*********** Pendientes:", listasEstudiantes.ConteoPendientes, "- EDD GoDrive *************")
@@ -113,20 +111,13 @@ func MenuPendientes(aceptados *listasEstudiantes.ListaAceptados, pendientes *lis
 			if eliminado != nil {
 				aceptados.Agregar(eliminado)
 				bitacora.Agregar("Se aceptó a " + eliminado.Nombre)
-				//quitar este mostrar
-				pendientes.Mostrar()
 			}
 		case 2:
 			eliminado := pendientes.EliminarPrimero()
 			bitacora.Agregar("Se rechazó a " + eliminado.Nombre)
-			pendientes.Mostrar()
 		case 3:
 		default:
-			fmt.Println("Ingresa una opción válida")
+			fmt.Println("\n------Advertencia: Ingresa una opción válida------")
 		}
 	}
-}
-
-func menuEstudiante() {
-
 }

@@ -1,20 +1,16 @@
 digraph G{
 
 rankdir=LR; 
- node[shape=component, style=filled, color=skyBlue, fontname="Century Gothic"]; 
+ node[shape=rectangle, style=filled, color=beige, fontname="Century Gothic"]; 
  graph [fontname="Century Gothic"]; 
  labelloc="t"; label="Estudiantes en el sistema"; 
-nodonull1[label="null"];
-nodonull2[label="null"];
-0[label="201709018\nCristian Suy"]
-1[label="201955646\nJorge Méndez"]
-2[label="202111835\nRubén Ralda"]
-3[label="202115650\nEmily de León"]
+nodonull1[label="NULL"];
+nodonull2[label="NULL"];
+0[label="201403877\nEbany Larios"]
+1[label="201709018\nCristian Suy"]
+2[label="201780044\nLeonardo Martinez"]
+3[label="202111835\nRubén Ralda"]
 nodonull1->0 -> 1 -> 2 -> 3->nodonull2;
-nodonull2->3 -> 2 -> 1 -> 0->nodonull1
-n0[label="Se inició sesión\n2023-02-24  21:41:19"]
-n1[label="Se inició sesión\n2023-02-24  21:41:31"]
-2 -> n0 -> n1;
-{rank=same;2,n0,n1}
+3 -> 2 -> 1 -> 0;
 
 }

@@ -1,6 +1,7 @@
 package listasEstudiantes
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -20,11 +21,11 @@ type bitacoraEstudiante struct {
 }
 
 type NodoStudiante struct {
+	Carnet    int32
+	Nombre    string
+	Pass      string
 	siguiente *NodoStudiante
 	anterior  *NodoStudiante
-	carnet    int32
-	Nombre    string
-	pass      string
 	primeroB  *bitacoraEstudiante
 	ultimoB   *bitacoraEstudiante
 }
@@ -43,7 +44,7 @@ func (estudiante *NodoStudiante) ApilarBitacora() {
 }
 func (actual NodoStudiante) Mostrar() {
 	for actual.primeroB != nil {
-		fmt.Println("---Fecha:", actual.primeroB.fecha, actual.primeroB.hora)
+		fmt.Println("----Fecha:", actual.primeroB.fecha, actual.primeroB.hora)
 		actual.primeroB = actual.primeroB.siguiente
 	}
 }
@@ -53,8 +54,8 @@ type ColaPendientes struct {
 	Ultimo  *NodoStudiante
 }
 
-func (estudiante *ColaPendientes) Agregar(carnet int32, Nombre, pass string) {
-	nuevo := NodoStudiante{siguiente: nil, anterior: nil, carnet: carnet, Nombre: Nombre, pass: pass}
+func (estudiante *ColaPendientes) Agregar(Carnet int32, Nombre, pass string) {
+	nuevo := NodoStudiante{siguiente: nil, anterior: nil, Carnet: Carnet, Nombre: Nombre, Pass: pass}
 	if estudiante.Primero == nil {
 		estudiante.Primero = &nuevo
 		estudiante.Ultimo = &nuevo
@@ -69,7 +70,7 @@ func (estudiante *ColaPendientes) CargaMasiva(NombreArchivo string) string {
 	fichero, err := os.ReadFile(NombreArchivo)
 	if os.IsNotExist(err) {
 		log.Fatal(err)
-		return "Ocurrió un error al intentar abrir el archivo"
+		return "\n------Error: Ocurrió un error al intentar abrir el archivo------"
 	}
 	lineas := strings.Split(string(fichero), "\n")
 	for _, linea := range lineas {
@@ -77,13 +78,13 @@ func (estudiante *ColaPendientes) CargaMasiva(NombreArchivo string) string {
 		if dato[0] == "" {
 			continue
 		}
-		carnet, err := strconv.ParseInt(dato[0], 0, 32)
+		Carnet, err := strconv.ParseInt(dato[0], 0, 32)
 		if err != nil {
-			return "El carnet " + dato[0] + " no es correcto"
+			return "\n------Error: El Carnet " + dato[0] + " no es correcto------"
 		}
-		estudiante.Agregar(int32(carnet), strings.Trim(strings.TrimSpace(dato[1]), "\n"), strings.Trim(strings.TrimSpace(dato[2]), "\n"))
+		estudiante.Agregar(int32(Carnet), strings.Trim(strings.TrimSpace(dato[1]), "\n"), strings.Trim(strings.TrimSpace(dato[2]), "\n"))
 	}
-	return "Se ha cargado el archivo con éxito"
+	return "\n------Los estudiantes se han agregado a la cola con éxito------"
 }
 
 func (estudiante *ColaPendientes) EliminarPrimero() *NodoStudiante {
@@ -108,12 +109,12 @@ func (estudiante *ColaPendientes) report() string {
 	conexion := ""
 	text := ""
 	text += "rankdir=LR; \n "
-	text += "node[shape=component, style=filled, color=skyBlue, fontname=\"Century Gothic\"]; \n "
+	text += "node[shape=rectangle, style=filled, color=skyBlue, fontname=\"Century Gothic\"]; \n "
 	text += "graph [fontname=\"Century Gothic\"]; \n "
 	text += "labelloc=\"t\"; label=\"Estudiantes en espera de ser aceptados\"; \n"
 	i := 0
 	for {
-		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
+		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.Carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
 		conexion += strconv.FormatInt(int64(i), 10)
 		aux = aux.siguiente
 		if aux == nil {
@@ -130,14 +131,14 @@ func (estudiante ColaPendientes) CrearReporte() {
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/colaPendientes.dot")
 	if err != nil {
-		fmt.Println(err, "Hubo un error al crear el archivo")
+		fmt.Println("\n------Error: Hubo un error al crear el archivo------", err)
 		return
 	}
 	defer fichero.Close()
 	contenido += estudiante.report()
 	contenido += "\n}"
 	if _, err = fichero.Write([]byte(contenido)); err != nil {
-		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		fmt.Println("\n------Error: Hubo un error al escribir en el archivo------", err)
 		return
 	}
 	if estudiante.Primero != nil {
@@ -145,13 +146,6 @@ func (estudiante ColaPendientes) CrearReporte() {
 		cmd, _ := exec.Command(path, "-Tjpg", "-Gcharset=latin1", "./textos/colaPendientes.dot").Output()
 		mode := 0777
 		_ = ioutil.WriteFile("colaPendientes.png", cmd, os.FileMode(mode))
-	}
-}
-
-func (estudiantes ColaPendientes) Mostrar() {
-	for estudiantes.Primero != nil {
-		fmt.Print("-->", estudiantes.Primero.Nombre)
-		estudiantes.Primero = estudiantes.Primero.siguiente
 	}
 }
 
@@ -167,7 +161,7 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 		lista.Primero.siguiente = nil
 		return
 	}
-	if lista.Primero.carnet > estudiante.carnet {
+	if lista.Primero.Carnet > estudiante.Carnet {
 		estudiante.siguiente = lista.Primero
 		lista.Primero.anterior = estudiante
 		estudiante.anterior = nil
@@ -176,7 +170,7 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 	}
 	for actual := lista.Primero; actual != nil; {
 		if actual.siguiente == nil {
-			if actual.carnet < estudiante.carnet {
+			if actual.Carnet < estudiante.Carnet {
 				actual.siguiente = estudiante
 				estudiante.siguiente = nil
 				estudiante.anterior = lista.Ultimo
@@ -191,7 +185,7 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 			}
 			break
 		} else {
-			if actual.carnet < estudiante.carnet && estudiante.carnet < actual.siguiente.carnet {
+			if actual.Carnet < estudiante.Carnet && estudiante.Carnet < actual.siguiente.Carnet {
 				estudiante.siguiente = actual.siguiente
 				actual.siguiente.anterior = estudiante
 				actual.siguiente = estudiante
@@ -203,24 +197,24 @@ func (lista *ListaAceptados) Agregar(estudiante *NodoStudiante) {
 	}
 }
 
-func (lista *ListaAceptados) IniciarSesión(carnet int32, pass string) {
+func (lista *ListaAceptados) IniciarSesión(Carnet int32, pass string) {
 	for actual := lista.Primero; actual != nil; {
-		if actual.carnet == carnet {
-			if actual.pass == pass {
+		if actual.Carnet == Carnet {
+			if actual.Pass == pass {
 				actual.ApilarBitacora()
-				fmt.Println("SESIÓN INICIADA CORRECTAMENTE")
+				fmt.Println("\n------SESIÓN INICIADA CORRECTAMENTE------")
 				fmt.Println("Nombre:", actual.Nombre)
-				fmt.Println("Se inició sesión:")
+				fmt.Println("Se inició sesión estas fechas:")
 				actual.Mostrar()
 				return
 			} else {
-				fmt.Println("La contraseña es incorrecta")
+				fmt.Println("\n------Error: La contraseña es incorrecta------")
 				return
 			}
 		}
 		actual = actual.siguiente
 	}
-	fmt.Println("El usuario no existe")
+	fmt.Println("\n------Error: El usuario no existe------")
 }
 
 func (estudiante *ListaAceptados) report() string {
@@ -235,15 +229,15 @@ func (estudiante *ListaAceptados) report() string {
 	text := ""
 	rank := ""
 	text += "rankdir=LR; \n "
-	text += "node[shape=component, style=filled, color=skyBlue, fontname=\"Century Gothic\"]; \n "
+	text += "node[shape=rectangle, style=filled, color=beige, fontname=\"Century Gothic\"]; \n "
 	text += "graph [fontname=\"Century Gothic\"]; \n "
 	text += "labelloc=\"t\"; label=\"Estudiantes en el sistema\"; \n"
-	text += "nodonull1[label=\"null\"];\n"
-	text += "nodonull2[label=\"null\"];\n"
+	text += "nodonull1[label=\"NULL\"];\n"
+	text += "nodonull2[label=\"NULL\"];\n"
 	i := 0
 	x := 0
 	for {
-		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
+		text += strconv.FormatInt(int64(i), 10) + "[label=\"" + strconv.FormatInt(int64(aux.Carnet), 10) + "\\n" + aux.Nombre + "\"]\n"
 		conexion += strconv.FormatInt(int64(i), 10)
 		conexionEnlaza = strconv.FormatInt(int64(i), 10) + conexionEnlaza
 		auxBitacora := aux.primeroB
@@ -282,14 +276,14 @@ func (estudiante ListaAceptados) CrearReporte() {
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/aceptados.dot")
 	if err != nil {
-		fmt.Println(err, "Hubo un error al crear el archivo")
+		fmt.Println("\n------Error: Hubo un error al crear el archivo------", err)
 		return
 	}
 	defer fichero.Close()
 	contenido += estudiante.report()
 	contenido += "\n}"
 	if _, err = fichero.Write([]byte(contenido)); err != nil {
-		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		fmt.Println("\n------Error: Hubo un error al escribir en el archivo------", err)
 		return
 	}
 	if estudiante.Primero != nil {
@@ -301,11 +295,50 @@ func (estudiante ListaAceptados) CrearReporte() {
 }
 
 func (estudiantes ListaAceptados) Listado() {
+	if estudiantes.Primero == nil {
+		fmt.Println("\n-----No hay estudiantes en el sistema----")
+		return
+	}
 	fmt.Println("\n*********** Listado de estudiantes *************")
 	for estudiantes.Primero != nil {
-		fmt.Println("Nombre:", estudiantes.Primero.Nombre, "Carnet:", estudiantes.Primero.carnet)
+		fmt.Println("Nombre:", estudiantes.Primero.Nombre, "Carnet:", estudiantes.Primero.Carnet)
 		fmt.Println("**************************************************")
 		estudiantes.Primero = estudiantes.Primero.siguiente
+	}
+}
+
+func (list ListaAceptados) ToSlice() []interface{} {
+	var values []interface{}
+	currentNode := list.Primero
+	for currentNode != nil {
+		values = append(values, currentNode)
+		currentNode = currentNode.siguiente
+	}
+	return values
+}
+
+type estructura struct {
+	Alumnos []interface{}
+}
+
+func (list ListaAceptados) ToJSON() ([]byte, error) {
+	values := list.ToSlice()
+	estructura := estructura{Alumnos: values}
+	return json.Marshal(estructura)
+}
+
+func (estudiante ListaAceptados) ReporteJson() {
+	fichero, err := os.Create("aceptado.json")
+	if err != nil {
+		fmt.Println("\n------Error: Hubo un error al crear el archivo------", err)
+		return
+	}
+	defer fichero.Close()
+
+	datos, _ := estudiante.ToJSON()
+	if _, err = fichero.Write(datos); err != nil {
+		fmt.Println("\n------Error: Hubo un error al escribir en el archivo------", err)
+		return
 	}
 }
 
@@ -364,14 +397,14 @@ func (bitacora PilaAdmin) CrearReporte() {
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/bitacoraAdmin.dot")
 	if err != nil {
-		fmt.Println(err, "Hubo un error al crear el archivo")
+		fmt.Println("\n------Error: Hubo un error al crear el archivo------", err)
 		return
 	}
 	defer fichero.Close()
 	contenido += bitacora.report()
 	contenido += "\n}"
 	if _, err = fichero.Write([]byte(contenido)); err != nil {
-		fmt.Println(err, "Hubo un error al escribir en el archivo")
+		fmt.Println("\n------Error: Hubo un error al escribir en el archivo------", err)
 		return
 	}
 	if bitacora.Primero != nil {
@@ -379,12 +412,5 @@ func (bitacora PilaAdmin) CrearReporte() {
 		cmd, _ := exec.Command(path, "-Tjpg", "-Gcharset=latin1", "./textos/bitacoraAdmin.dot").Output()
 		mode := 0777
 		_ = ioutil.WriteFile("bitacoraAdmin.png", cmd, os.FileMode(mode))
-	}
-}
-
-func (bitacora PilaAdmin) Mostrar() {
-	for bitacora.Primero != nil {
-		fmt.Println(bitacora.Primero.mensaje)
-		bitacora.Primero = bitacora.Primero.siguiente
 	}
 }
