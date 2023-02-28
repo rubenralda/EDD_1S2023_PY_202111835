@@ -6,14 +6,21 @@ rankdir=LR;
  labelloc="t"; label="Estudiantes en el sistema"; 
 nodonull1[label="NULL"];
 nodonull2[label="NULL"];
-0[label="201709018\nCristian Suy"]
-1[label="201780044\nLeonardo Martinez"]
-2[label="201955646\nJorge Méndez"]
-3[label="202111835\nRubén Ralda"]
-nodonull1->0 -> 1 -> 2 -> 3->nodonull2;
-3 -> 2 -> 1 -> 0;
-n0[label="Se inició sesión\n2023-02-25  22:27:08"]
-3 -> n0;
-{rank=same;3,n0}
+0[label="201154386\nNatalia Romero"]
+1[label="201181267\nMason Evans"]
+2[label="201268474\nJulian Lewis"]
+3[label="201624655\nEthan Johnson"]
+4[label="201742965\nAaliyah Moore"]
+5[label="201775582\nLiam Perez"]
+6[label="201834323\nLandon Dominguez"]
+7[label="201834501\nJonathan Martin"]
+8[label="201845056\nJacob Smith"]
+9[label="201858402\nEvelyn Gomez"]
+10[label="201902201\nEmma Smith"]
+nodonull1->0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10->nodonull2;
+10 -> 9 -> 8 -> 7 -> 6 -> 5 -> 4 -> 3 -> 2 -> 1 -> 0;
+n0[label="Se inició sesión\n2023-02-27  22:26:48"]
+4 -> n0;
+{rank=same;4,n0}
 
 }

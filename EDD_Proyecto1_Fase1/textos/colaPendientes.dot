@@ -4,7 +4,25 @@ rankdir=LR;
  node[shape=rectangle, style=filled, color=skyBlue, fontname="Century Gothic"]; 
  graph [fontname="Century Gothic"]; 
  labelloc="t"; label="Estudiantes en espera de ser aceptados"; 
-0[label="200577021\nMaría pérez"]
-1[label="201654868\nJosue"]
-0 -> 1
+0[label="201429023\nCarter Davis"]
+1[label="201148052\nVictoria Mendoza"]
+2[label="201586983\nWilliam Reyes"]
+3[label="201276462\nGrace Lee"]
+4[label="201582921\nSofia Brown"]
+5[label="201320406\nElijah Flores"]
+6[label="201119722\nIsabelle Sanchez"]
+7[label="201228103\nAlexander Taylor"]
+8[label="201783682\nChloe Anderson"]
+9[label="201936870\nMiles Martin"]
+10[label="201923235\nAvery Williams"]
+11[label="201294710\nEmily Thompson"]
+12[label="201342579\nGabriel Jackson"]
+13[label="201210026\nHazel Brown"]
+14[label="201617256\nAiden Garcia"]
+15[label="201322666\nAshley Davis"]
+16[label="201576540\nMason Williams"]
+17[label="201382932\nLila Davis"]
+18[label="201459942\nCaleb Jackson"]
+19[label="201824446\nMia Clark"]
+0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
 }
