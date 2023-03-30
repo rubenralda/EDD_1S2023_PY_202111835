@@ -1,5 +1,5 @@
-/EDD_Proyecto1_Fase1/textos
-*.png
-*.csv
-*.dot
-*.json
+EDD_Proyecto1_Fase1/textos
+EDD_Proyecto1_Fase1/*.png
+EDD_Proyecto1_Fase1/*.csv
+EDD_Proyecto1_Fase1/*.dot
+EDD_Proyecto1_Fase1/*.json

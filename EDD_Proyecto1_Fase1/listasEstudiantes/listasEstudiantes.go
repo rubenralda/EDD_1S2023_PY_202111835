@@ -73,14 +73,17 @@ func (estudiante *ColaPendientes) CargaMasiva(NombreArchivo string) string {
 		return "\n------Error: Ocurrió un error al intentar abrir el archivo------"
 	}
 	lineas := strings.Split(string(fichero), "\n")
+	i := 0
 	for _, linea := range lineas {
+		i++
 		dato := strings.Split(linea, ",")
-		if dato[0] == "" {
+		if len(dato) != 3 {
 			continue
 		}
 		Carnet, err := strconv.ParseInt(dato[0], 0, 32)
 		if err != nil {
-			return "\n------Error: El Carnet " + dato[0] + " no es correcto------"
+			fmt.Println("\n------Error: El Carnet \"" + dato[0] + "\" no es correcto, en la linea " + strconv.FormatInt(int64(i), 10))
+			continue
 		}
 		estudiante.Agregar(int32(Carnet), strings.Trim(strings.TrimSpace(dato[1]), "\n"), strings.Trim(strings.TrimSpace(dato[2]), "\n"))
 	}
@@ -128,6 +131,10 @@ func (estudiante *ColaPendientes) report() string {
 }
 
 func (estudiante ColaPendientes) CrearReporte() {
+	if crearCarpeta() == 1 {
+		fmt.Println("\n------Error: Hubo un error al crear el archivo")
+		return
+	}
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/colaPendientes.dot")
 	if err != nil {
@@ -273,6 +280,10 @@ func (estudiante *ListaAceptados) report() string {
 }
 
 func (estudiante ListaAceptados) CrearReporte() {
+	if crearCarpeta() == 1 {
+		fmt.Println("\n------Error: Hubo un error al crear el archivo")
+		return
+	}
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/aceptados.dot")
 	if err != nil {
@@ -393,6 +404,10 @@ func (bitacora *PilaAdmin) report() string {
 }
 
 func (bitacora PilaAdmin) CrearReporte() {
+	if crearCarpeta() == 1 {
+		fmt.Println("\n------Error: Hubo un error al crear el archivo")
+		return
+	}
 	contenido := "digraph G{\n\n"
 	fichero, err := os.Create("./textos/bitacoraAdmin.dot")
 	if err != nil {
@@ -412,4 +427,15 @@ func (bitacora PilaAdmin) CrearReporte() {
 		mode := 0777
 		_ = ioutil.WriteFile("bitacoraAdmin.png", cmd, os.FileMode(mode))
 	}
+}
+
+func crearCarpeta() int {
+	err := os.Mkdir("./textos", 0755)
+	if err != nil {
+		if !os.IsExist(err) {
+			fmt.Println(err)
+			return 1
+		}
+	}
+	return 0
 }
