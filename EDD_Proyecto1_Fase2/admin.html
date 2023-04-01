@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Administrador</title>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.min.js"
+        integrity="sha384-heAjqF+bCxXpCWLa6Zhcp4fu20XoNIA98ecBC1YkdXhszjoejr5y9Q77hIrv8R9i"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+
+
+</head>
+
+<body>
+    <section class="vh-100">
+        <div class="container text-center h-75">
+            <div class="row justify-content-between align-items-center h-100">
+                <div class="col-md-5">
+                    <div class="row mb-4">
+                        <div class="input-group">
+                            <select class="form-select" id="opcion">
+                                <option selected>Escoge una opción</option>
+                                <option value="0">In-Orden</option>
+                                <option value="1">Post-Orden</option>
+                                <option value="2">Pre-Orden</option>
+                            </select>
+                            <button class="btn btn-success" type="submit">Mostrar Alumnos</button>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <button class="btn btn-danger" type="submit" id="btnMostrar">Arbol de estudiantes</button>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="archivosJson" name="archivo" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".json">
+                            <button class="btn btn-primary" type="submit" id="btnCarga">Carga Masiva</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-6">
+                    <h1>Estudiantes</h1><br>
+                    <table class="table">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th scope="col">Carnet</th>
+                                <th scope="col">Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider" id="datos">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row h-50" id="contenedorImagen">
+               
+            </div>
+        </div>
+    </section>
+    <script type="module" src="JS/scriptAdmin.js"></script>
+</body>
+
+</html>

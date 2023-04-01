@@ -21,13 +21,14 @@ type bitacoraEstudiante struct {
 }
 
 type NodoStudiante struct {
-	Carnet    int32
-	Nombre    string
-	Pass      string
-	siguiente *NodoStudiante
-	anterior  *NodoStudiante
-	primeroB  *bitacoraEstudiante
-	ultimoB   *bitacoraEstudiante
+	Carnet       int32
+	Nombre       string
+	Pass         string
+	Carpeta_Raiz string
+	siguiente    *NodoStudiante
+	anterior     *NodoStudiante
+	primeroB     *bitacoraEstudiante
+	ultimoB      *bitacoraEstudiante
 }
 
 func (estudiante *NodoStudiante) ApilarBitacora() {
@@ -55,7 +56,7 @@ type ColaPendientes struct {
 }
 
 func (estudiante *ColaPendientes) Agregar(Carnet int32, Nombre, pass string) {
-	nuevo := NodoStudiante{siguiente: nil, anterior: nil, Carnet: Carnet, Nombre: Nombre, Pass: pass}
+	nuevo := NodoStudiante{siguiente: nil, anterior: nil, Carnet: Carnet, Nombre: Nombre, Pass: pass, Carpeta_Raiz: "/"}
 	if estudiante.Primero == nil {
 		estudiante.Primero = &nuevo
 		estudiante.Ultimo = &nuevo
