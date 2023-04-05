@@ -20,9 +20,10 @@
 
 <body>
     <section class="vh-100">
-        <div class="container text-center h-75">
-            <div class="row justify-content-between align-items-center h-100">
-                <div class="col-md-5">
+        <div class="container text-center h-100">
+            <div class="row row-cols-md-2 g-5 justify-content-between align-items-center h-100">
+                <div class="col">
+                    <h1>Menú Administrador</h1><br>
                     <div class="row mb-4">
                         <div class="input-group">
                             <select class="form-select" id="opcion">
@@ -31,22 +32,26 @@
                                 <option value="1">Post-Orden</option>
                                 <option value="2">Pre-Orden</option>
                             </select>
-                            <button class="btn btn-success" type="submit">Mostrar Alumnos</button>
+                            <button class="btn btn-success" type="submit" id="btnRecorrido">Mostrar Alumnos</button>
                         </div>
                     </div>
                     <div class="row mb-4">
-                        <button class="btn btn-danger" type="submit" id="btnMostrar">Arbol de estudiantes</button>
+                        <button class="btn btn-secondary" type="submit" id="btnMostrar">Arbol de estudiantes</button>
                     </div>
                     <div class="row mb-4">
                         <div class="input-group">
-                            <input type="file" class="form-control" id="archivosJson" name="archivo" aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".json">
+                            <input type="file" class="form-control" id="archivosJson" name="archivo"
+                                aria-describedby="inputGroupFileAddon04" aria-label="Upload" accept=".json">
                             <button class="btn btn-primary" type="submit" id="btnCarga">Carga Masiva</button>
                         </div>
                     </div>
 
+                    <div class="row mb-4">
+                        <button class="btn btn-danger" type="submit" id="btnCerrarSesion">Cerrar Sesión</button>
+                    </div>
                 </div>
 
-                <div class="col-6">
+                <div class="col">
                     <h1>Estudiantes</h1><br>
                     <table class="table">
                         <thead class="table-secondary">
@@ -61,8 +66,13 @@
                     </table>
                 </div>
             </div>
-            <div class="row h-50" id="contenedorImagen">
-               
+
+        </div>
+    </section>
+    <section class="vh-100">
+        <div class="container text-center h-75">
+            <div class="h-75 w-100 justify-content-between align-items-center" >
+                <div class="col align-self-center" id="contenedorImagen"></div>
             </div>
         </div>
     </section>
