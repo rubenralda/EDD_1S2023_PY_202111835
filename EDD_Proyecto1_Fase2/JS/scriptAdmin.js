@@ -24,6 +24,7 @@ async function cargarArchivo(e) {
   let estudiantes = JSON.parse(await readFile(archivo));
   //agregamos los datos al arbol
   estudiantes.Alumnos.forEach((element) => {
+    //validar con los atributos del proyecto?
     nuevoArbol.agregar(element.Nombre, element.Pass, element.Carnet);
   });
   localStorage.setItem("arbol", JSON.stringify(nuevoArbol));
@@ -57,9 +58,9 @@ botonMostrar.addEventListener("click", (e) => {
     alert("Cargue un archivo");
     return;
   }
-  let cabeza = `graph prueba{
+  let cabeza = `digraph prueba{
     fontname="Helvetica,Arial,sans-serif"
-    node [fontname="Helvetica,Arial,sans-serif"]
+    node [fontname="Helvetica,Arial,sans-serif", shape=box]
     edge [fontname="Helvetica,Arial,sans-serif"]\n`;
   cabeza += mostrarArbol(arbol.raiz);
   cabeza += "}";
@@ -76,11 +77,11 @@ function mostrarArbol(nodo) {
   if (nodo != null) {
     cuerpo += `${nodo.carnet}[label="${nodo.carnet}\\n${nodo.nombre}\\nAltura: ${nodo.altura}"]; \n`;
     if (nodo.izquierdo != null) {
-      cuerpo += nodo.carnet + " -- " + nodo.izquierdo.carnet + ";\n";
+      cuerpo += nodo.carnet + " -> " + nodo.izquierdo.carnet + ";\n";
       cuerpo += mostrarArbol(nodo.izquierdo);
     }
     if (nodo.derecho != null) {
-      cuerpo += nodo.carnet + " -- " + nodo.derecho.carnet + ";\n";
+      cuerpo += nodo.carnet + " -> " + nodo.derecho.carnet + ";\n";
       cuerpo += mostrarArbol(nodo.derecho);
     }
   }

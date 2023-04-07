@@ -1,17 +1,33 @@
-export class archivos{
-  constructor(nombre,  informacion){
+export class NodoPermiso{
+  constructor(nombre, columna){
+    const now = new Date();
+    this.id = now.getTime();
     this.nombre = nombre
-    this.informacion = informacion
+    this.columna = columna
     this.siguiente = null
-    this.carnet = 0
+  }
+}
+
+export class NodoArchivos{
+  constructor(nombre,  informacion){
+    const now = new Date();
+    this.id = now.getTime();
+    this.nombre = nombre
+    this.informacion = informacion //almacenamiento en base64
+    this.primero = null
+    this.ultimo = null//apuntador al siguiente nodopermiso
+    this.copia = 0
   }
 }
 
 export class nodoCarpeta{
   constructor(nombre){
+    const now = new Date();
+    this.id = now.getTime();
     this.nombre = nombre
-    this.carpetas = []
-    this.archivos = []
+    this.copia = 0
+    this.carpetas = [] //nodo carpetas
+    this.archivos = [] //nodo archivos
   }
 }
 
