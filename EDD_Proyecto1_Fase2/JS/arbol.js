@@ -14,8 +14,8 @@ export class NodoArchivos{
     this.id = now.getTime();
     this.nombre = nombre
     this.informacion = informacion //almacenamiento en base64
-    this.primero = null
-    this.ultimo = null//apuntador al siguiente nodopermiso
+    this.primero = null//apuntador al siguiente nodopermiso
+    this.ultimo = null
     this.copia = 0
   }
 }
@@ -31,6 +31,15 @@ export class nodoCarpeta{
   }
 }
 
+export class NodoBitacora{
+  constructor(accion){
+    this.accion = accion
+    this.siguiente = null
+    const now = new Date();
+    this.hora = now.getHours() + ":" + now.getMinutes()
+    this.fecha = now.getDate() + "-" + now.getMonth() + "-" + now.getFullYear()
+  }
+}
 
 export class nodoEstudiante {
   constructor(nombre, pass, carnet) {
@@ -40,6 +49,7 @@ export class nodoEstudiante {
     this.izquierdo = null;
     this.derecho = null;
     this.altura = 0;
+    this.cabezaBitacora = null //apuntador NodoBitacora
     this.carpetaRaiz= new nodoCarpeta("/");
   }
 }

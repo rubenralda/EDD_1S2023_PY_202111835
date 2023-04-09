@@ -23,10 +23,19 @@ async function cargarArchivo(e) {
   let nuevoArbol = new ArbolAvl();
   let estudiantes = JSON.parse(await readFile(archivo));
   //agregamos los datos al arbol
-  estudiantes.Alumnos.forEach((element) => {
-    //validar con los atributos del proyecto?
-    nuevoArbol.agregar(element.Nombre, element.Pass, element.Carnet);
-  });
+  if (estudiantes.Alumnos != undefined) {
+    estudiantes.Alumnos.forEach((element) => {
+      nuevoArbol.agregar(element.Nombre || element.nombre, element.Pass || element.pass, element.Carnet || element.carnet);
+    });  
+  }else if(estudiantes.alumnos != undefined){
+    estudiantes.alumnos.forEach((element) => {
+      nuevoArbol.agregar(element.Nombre || element.nombre, element.Pass || element.pass, element.Carnet || element.carnet);
+    }); 
+  }else{
+    alert("Hubo un error con el archivo: atributos no encontrados")
+    return
+  }
+  
   localStorage.setItem("arbol", JSON.stringify(nuevoArbol));
 
   //motrar el recorrido in-orden en la tabla
@@ -68,7 +77,8 @@ botonMostrar.addEventListener("click", (e) => {
   imagen.innerHTML = `<h2 id="unMensaje">Arbol de estudiantes</h2>
   <img src="" alt="unMensaje" class="img-fluid align-items-center" id="image">`;
   let archivo = document.getElementById("image");
-  archivo.src = "https://quickchart.io/graphviz?graph=" + cabeza;
+  let codificada = encodeURIComponent(cabeza);
+  archivo.src = `https://quickchart.io/graphviz?graph=${codificada}`;
   console.log(cabeza);
 });
 

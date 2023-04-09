@@ -1,8 +1,9 @@
-import { NodoArchivos, nodoCarpeta, NodoPermiso } from "./arbol.js";
+import { NodoArchivos, nodoCarpeta, NodoPermiso, NodoBitacora } from "./arbol.js";
 
 let carpetaActual = null;
 let carpetaRaiz = null;
 let arbol = null;
+let usuario = null;
 
 document.addEventListener("DOMContentLoaded", (e) => {
   if (localStorage.getItem("isLoggedIn") == "false") {
@@ -35,6 +36,7 @@ function cargarCarnets(nodo, carnet) {
       data += `<option value="${nodo.carnet}">${nodo.carnet} ${nodo.nombre} </option>`;
     } else {
       carpetaRaiz = nodo.carpetaRaiz;
+      usuario = nodo
     }
     if (nodo.izquierdo != null) {
       data += cargarCarnets(nodo.izquierdo, carnet);
@@ -74,12 +76,16 @@ btnCrearCarpeta.addEventListener("click", (e) => {
   let nuevoCarpeta = new nodoCarpeta(nombreNuevo);
   carpetaActual.carpetas.push(nuevoCarpeta);
   mostrarContenidoCarpeta(carpetaActual);
+  let nuevoBitacora = new NodoBitacora(`Se creó carpeta \\"${nombreNuevo}\\"`)
+  nuevoBitacora.siguiente = usuario.cabezaBitacora
+  usuario.cabezaBitacora = nuevoBitacora
   localStorage.setItem("arbol", JSON.stringify(arbol));
   e.stopPropagation();
 });
 
 let btnEliminar = document.querySelector("#btnEliminar");
 btnEliminar.addEventListener("click", (e) => {
+  e.preventDefault();
   let nombre = document.getElementById("nombreEliminar").value;
   if (nombre == "") {
     alert("Escribe un nombre");
@@ -90,6 +96,9 @@ btnEliminar.addEventListener("click", (e) => {
     if (carpetaActual.carpetas[key].nombre == nombre) {
       carpetaActual.carpetas.splice(key, 1);
       existe = true;
+      let nuevoBitacora = new NodoBitacora(`Se eliminó carpeta \\"${nombre}\\"`)
+      nuevoBitacora.siguiente = usuario.cabezaBitacora
+      usuario.cabezaBitacora = nuevoBitacora
       break;
     }
   }
@@ -98,6 +107,7 @@ btnEliminar.addEventListener("click", (e) => {
   }
   mostrarContenidoCarpeta(carpetaActual);
   localStorage.setItem("arbol", JSON.stringify(arbol));
+  e.stopPropagation();
 });
 
 function mostrarContenidoCarpeta(carpeta) {
@@ -193,6 +203,9 @@ inputArchivos.addEventListener("change", (e) => {
     carpetaActual.archivos.push(nuevoArchivo);
     inputArchivos.value = "";
     mostrarContenidoCarpeta(carpetaActual);
+    let nuevoBitacora = new NodoBitacora(`Se creó archivo \\"${nombre}\\"`)
+    nuevoBitacora.siguiente = usuario.cabezaBitacora
+    usuario.cabezaBitacora = nuevoBitacora
     localStorage.setItem("arbol", JSON.stringify(arbol));
     e.stopPropagation();
   };
@@ -207,7 +220,9 @@ btnCarpetas.addEventListener("click", (e) => {
         edge [fontname="Helvetica,Arial,sans-serif"]\n`;
   cabeza += reporteCarpetas(carpetaRaiz);
   cabeza += "}";
-  window.open(`https://quickchart.io/graphviz?graph=${cabeza}`, "_blank");
+  let codificada = encodeURIComponent(cabeza);
+  window.open(`https://quickchart.io/graphviz?graph=${codificada}`, "_blank");
+  console.log(cabeza)
   e.stopPropagation();
 });
 
@@ -238,13 +253,11 @@ btnReporteArchivos.addEventListener("click", (e) => {
     /* esto no se elimina, es para evitar el posicionamiento a lo loco */
     e0[ shape = point, width = 0 ];
     e1[ shape = point, width = 0 ];`
-  let conexionColumnas = "mt "
   let conexionfila = "mt "
   let rankColumna = "{ rank = same; mt;"
   let rankFilas = "{ rank = same;"
   let conexionColumnaVertical = []
   let conexionNodo = ""
-  console.log(carpetaActual.archivos)
   for (const iterator of carpetaActual.archivos) {
     let key = iterator.nombre.substring(iterator.nombre.length - 3);
     let url = "";
@@ -285,10 +298,8 @@ btnReporteArchivos.addEventListener("click", (e) => {
       if (existe == -1) {
         texto += `${aux.columna}[label = "${aux.columna}"  width = 1.5 style = filled, fillcolor = lightskyblue, group = ${largo} ];\n`
         rankColumna += "" + aux.columna + ";"
-        conexionColumnas += " -> " + aux.columna
         conexionColumnaVertical.push(`${aux.columna} -> ${aux.id}`)  
       }else {
-        console.log(existe-1)
         conexionColumnaVertical[existe] += "-> " + aux.id
       }     
       aux = aux.siguiente
@@ -306,15 +317,14 @@ btnReporteArchivos.addEventListener("click", (e) => {
     texto += conexionColumnaVertical[index] + "\n"
   }
   columnas.sort()
-  let prueba = "mt"
+  let conexionColumnas = "mt"
   for (let index = 0, fin = columnas.length; index < fin; index++) {
-    prueba += " -> " + columnas[index]
+    conexionColumnas += " -> " + columnas[index]
   }
-  texto += conexionNodo + "\n" + conexionfila + "\n" + prueba + "\n" + rankColumna +  "}\n"+ rankFilas + "\n}"
+  texto += conexionNodo + "\n" + conexionfila + "\n" + conexionColumnas + "\n" + rankColumna +  "}\n"+ rankFilas + "\n}"
   let codificada = encodeURIComponent(texto);
   window.open(`https://quickchart.io/graphviz?graph=${codificada}`, "_blank");
   console.log(texto)
-  console.log(conexionColumnas)
   e.stopPropagation();
 });
 
@@ -356,10 +366,11 @@ btnPermisos.addEventListener("click", (e) => {
         return
     }
     let nuevoNodo = new NodoPermiso(permiso, carnetEscogido)
-    console.log(archivoEscogido)
+    let nombre = ""
     for (const iterator of carpetaActual.archivos){
         if (iterator.id == archivoEscogido) {
-            if (iterator.primero == null) {
+          nombre = iterator.nombre  
+          if (iterator.primero == null) {
               iterator.primero = nuevoNodo
               break
             }else if (iterator.primero.columna > carnetEscogido){
@@ -385,15 +396,70 @@ btnPermisos.addEventListener("click", (e) => {
                 }
               }
             }
-            console.log(true)
-            console.log(iterator)
             break
           }
     }
+    let nuevoBitacora = new NodoBitacora(`Se otorgó permiso de \\"${permiso}\\",\\nal archivo \\"${nombre}\\" para ${carnetEscogido}`)
+            nuevoBitacora.siguiente = usuario.cabezaBitacora
+            usuario.cabezaBitacora = nuevoBitacora
+    alert("Permiso agregado")
     localStorage.setItem("arbol", JSON.stringify(arbol));
     e.stopPropagation();
 });
 
+const btnBitacora = document.querySelector("#btnBitacora");
+btnBitacora.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (usuario.cabezaBitacora == null) {
+    alert("No hay bitacora")
+    return
+  }
+  let aux = usuario.cabezaBitacora
+  let texto = `digraph prueba{
+    rankdir="LR"
+    fontname="Helvetica,Arial,sans-serif"
+    node [fontname="Helvetica,Arial,sans-serif", shape=box]
+    edge [fontname="Helvetica,Arial,sans-serif"]\n`
+  let i = 0
+  let conexion = ""
+  while (aux != null) {
+    texto += `${i}[label= "Acción: ${aux.accion}\\nFecha: ${aux.fecha}\\nHora: ${aux.hora}"];\n`;
+    conexion += "" + i
+    aux = aux.siguiente
+    if (aux == null) {
+      break;
+    }
+    conexion += " -> " 
+    i++
+  }
+  if (i > 0) {
+    conexion += ";\n" + i + " -> 0 [constraint=false];"
+  }
+  texto += conexion + "\n}"
+  let codificada = encodeURIComponent(texto);
+  window.open(`https://quickchart.io/graphviz?graph=${codificada}`, "_blank");
+  console.log(texto)
+  e.stopPropagation();
+});
+
+const btnRaiz = document.querySelector("#btnRaiz");
+btnRaiz.addEventListener("click", (e) =>{
+  e.preventDefault();
+  e.stopPropagation();
+  if (carpetaActual != carpetaRaiz) {
+    alert("Regresa a la carpeta raíz")
+    return
+  }
+  usuario.carpetaRaiz = new nodoCarpeta("/");
+  carpetaRaiz = usuario.carpetaRaiz
+  carpetaActual = carpetaRaiz
+  alert("Carpeta eliminada")
+  let nuevoBitacora = new NodoBitacora(`Se eliminó la carpeta Raíz`)
+  nuevoBitacora.siguiente = usuario.cabezaBitacora
+  usuario.cabezaBitacora = nuevoBitacora
+  mostrarContenidoCarpeta(carpetaActual);
+  localStorage.setItem("arbol", JSON.stringify(arbol));
+});
 
 //sin uso
 function buscar(carnet, nodo) {
