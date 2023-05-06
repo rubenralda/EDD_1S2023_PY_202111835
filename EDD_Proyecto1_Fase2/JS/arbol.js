@@ -54,7 +54,95 @@ export class nodoEstudiante {
   }
 }
 
-export class ArbolAvl {
+export class ArbolAvl{
+  constructor() {
+    this.raiz = null;
+  }
+
+  agregar(nombre, pass, carnet) {
+    this.raiz = this.agregarNodo(this.raiz, nombre, pass, carnet);
+  }
+
+  agregarNodo(node, nombre, pass, carnet) {
+    if (!node) {
+      return new nodoEstudiante(nombre, pass, carnet);
+    } else if (carnet < node.carnet) {
+      node.izquierdo = this.agregarNodo(node.izquierdo, nombre, pass, carnet);
+    } else {
+      node.derecho = this.agregarNodo(node.derecho, nombre, pass, carnet);
+    }
+
+    node.altura = 1 + Math.max(this._getHeight(node.izquierdo), this._getHeight(node.derecho));
+
+    const balanceFactor = this._getBalance(node);
+
+    // Caso 1 - Rotación izquierda izquierda
+    if (balanceFactor > 1 && carnet < node.izquierdo.carnet) {
+      return this._rotateRight(node);
+    }
+
+    // Caso 2 - Rotación derecha derecha
+    if (balanceFactor < -1 && carnet > node.derecho.carnet) {
+      return this._rotateLeft(node);
+    }
+
+    // Caso 3 - Rotación izquierda derecha
+    if (balanceFactor > 1 && carnet > node.izquierdo.carnet) {
+      node.izquierdo = this._rotateLeft(node.izquierdo);
+      return this._rotateRight(node);
+    }
+
+    // Caso 4 - Rotación derecha izquierda
+    if (balanceFactor < -1 && carnet < node.derecho.carnet) {
+      node.derecho = this._rotateRight(node.derecho);
+      return this._rotateLeft(node);
+    }
+
+    return node;
+  }
+
+  _getHeight(node) {
+    if (!node) {
+      return -1;
+    }
+    return node.altura;
+  }
+
+  _getBalance(node) {
+    if (!node) {
+      return 0;
+    }
+    return this._getHeight(node.izquierdo) - this._getHeight(node.derecho);
+  }
+
+  _rotateLeft(z) {
+    const y = z.derecho;
+    const T3 = y.izquierdo;
+
+    y.izquierdo = z;
+    z.derecho = T3;
+
+    z.altura = 1 + Math.max(this._getHeight(z.izquierdo), this._getHeight(z.derecho));
+    y.altura = 1 + Math.max(this._getHeight(y.izquierdo), this._getHeight(y.derecho));
+
+    return y;
+  }
+
+  _rotateRight(z) {
+    const y = z.izquierdo;
+    const T2 = y.derecho;
+
+    y.derecho = z;
+    z.izquierdo = T2;
+
+    z.altura = 1 + Math.max(this._getHeight(z.izquierdo), this._getHeight(z.derecho));
+    y.altura = 1 + Math.max(this._getHeight(y.izquierdo), this._getHeight(y.derecho));
+
+    return y;
+  }
+}
+
+class ArbolAvlSoloOrdenados{ // no funciona con archivo desordenados
   constructor() {
     this.raiz = null;
   }
