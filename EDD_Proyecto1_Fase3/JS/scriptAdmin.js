@@ -6,6 +6,8 @@ const botonCarga = document.querySelector("#btnCarga");
 const botonCerrar = document.querySelector("#btnCerrarSesion");
 const tablaEstudiantes = document.querySelector("#tablaEstudiantes");
 const tablaPermisos = document.querySelector("#tablaPermisos");
+const btnMensajes = document.querySelector('#btnMensajes');
+let bloque = null
 //const botonMostrar = document.querySelector("#btnMostrar");
 //const botonRecorrido = document.querySelector("#btnRecorrido");
 
@@ -16,6 +18,9 @@ document.addEventListener("DOMContentLoaded", (e) => {
   if (localStorage.getItem("tablaHash")) {
     mostrarEstudiantes(JSON.parse(localStorage.getItem("tablaHash")));
     mostrarPermisos(JSON.parse(localStorage.getItem("tablaHash")))
+  }
+  if (localStorage.getItem("blockchain") != null) {
+    bloque = JSON.parse(localStorage.getItem("blockchain"))
   }
   e.stopPropagation();
 });
@@ -80,6 +85,33 @@ botonCerrar.addEventListener("click", (e) => {
   location.href = "index.html";
 });
 
+btnMensajes.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (bloque == null) {
+    alert("No hay mensajes en el sistema")
+    return
+  }
+  document.getElementById("textMensajes").value = ""
+  let bloque_actual = bloque.inicio
+  while (bloque_actual != null) {
+    reporteMensajes(bloque_actual)
+    bloque_actual = bloque_actual.siguiente
+  }
+});
+
+function reporteMensajes(bloque_actual) {
+  if (bloque_actual != null) {
+    let cadena = "Index: " + bloque_actual.valor['index']
+    cadena += "\nTimeStamp: " + bloque_actual.valor['timestamp']
+    cadena += "\nEmisor: " + bloque_actual.valor['transmitter']
+    cadena += "\nReceptor: " + bloque_actual.valor['receiver']
+    cadena += "\nMensaje: " + bloque_actual.valor['message']
+    cadena += "\nPreviousHash: " + bloque_actual.valor['previoushash']
+    cadena += "\nHash: " + bloque_actual.valor['hash']
+    document.getElementById("textMensajes").value += cadena + "\n------------------------------------------------------------------------------------------\n"
+  }
+}
+
 function mostrarEstudiantes(users) {
   if (!users) {
     return
@@ -133,20 +165,20 @@ function recorrerCarpetas(nodo, tr, nombreCarpeta) {
       let tdUbicacion = document.createElement("td")
       tdDestino.innerHTML = aux.columna;
       tdPermiso.innerHTML = aux.nombre;
-      tdUbicacion.innerHTML = nombreCarpeta 
+      tdUbicacion.innerHTML = nombreCarpeta
       tr.appendChild(tdDestino);
       tr.appendChild(tdUbicacion);
       tr.appendChild(tdArchivo);
       tr.appendChild(tdPermiso);
-      
+
       tablaPermisos.appendChild(tr);
       let trNuevo = document.createElement("tr");
-      //console.log(tr.firstElementChild.childNodes[0].data)
       let tdNuevo = document.createElement("td")
       tdNuevo.innerHTML = tr.firstElementChild.childNodes[0].data
       trNuevo.appendChild(tdNuevo);
+      console.log(tr)
       tr = trNuevo
-      //console.log(tr)
+      console.log(tr)
       aux = aux.siguiente;
     }
   }
