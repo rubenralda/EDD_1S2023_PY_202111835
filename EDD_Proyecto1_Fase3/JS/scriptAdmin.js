@@ -1,15 +1,26 @@
-import {ArbolAvl } from "./arbol.js";
+import { ArbolAvl } from "./ArbolAVL/arbol.js";
+import HashTable from "./TablaHash/HashTable.js";
+import { nodoEstudiante } from "./TablaHash/Nodos.js";
+
+const botonCarga = document.querySelector("#btnCarga");
+const botonCerrar = document.querySelector("#btnCerrarSesion");
+const tablaEstudiantes = document.querySelector("#tablaEstudiantes");
+const tablaPermisos = document.querySelector("#tablaPermisos");
+//const botonMostrar = document.querySelector("#btnMostrar");
+//const botonRecorrido = document.querySelector("#btnRecorrido");
 
 document.addEventListener("DOMContentLoaded", (e) => {
   if (localStorage.getItem("isLoggedIn") == "false") {
     location.href = "index.html";
   }
+  if (localStorage.getItem("tablaHash")) {
+    mostrarEstudiantes(JSON.parse(localStorage.getItem("tablaHash")));
+    mostrarPermisos(JSON.parse(localStorage.getItem("tablaHash")))
+  }
   e.stopPropagation();
 });
 
-let botonCarga = document.querySelector("#btnCarga");
 botonCarga.addEventListener("click", cargarArchivo);
-
 async function cargarArchivo(e) {
   e.preventDefault();
   e.stopPropagation();
@@ -19,29 +30,130 @@ async function cargarArchivo(e) {
     alert("Seleccione un archivo");
     return;
   }
-  // creamos un nuevo arbol
   let nuevoArbol = new ArbolAvl();
+  let users = new HashTable(7);
   let estudiantes = JSON.parse(await readFile(archivo));
   //agregamos los datos al arbol
   if (estudiantes.Alumnos != undefined) {
     estudiantes.Alumnos.forEach((element) => {
-      nuevoArbol.agregar(element.Nombre || element.nombre, element.Pass || element.pass, element.Carnet || element.carnet);
-    });  
-  }else if(estudiantes.alumnos != undefined){
+      nuevoArbol.agregar(
+        element.Nombre || element.nombre,
+        element.Pass || element.pass,
+        element.Carnet || element.carnet
+      );
+      users.set(element.carnet, element);
+    });
+  } else if (estudiantes.alumnos != undefined) {
     estudiantes.alumnos.forEach((element) => {
-      nuevoArbol.agregar(element.Nombre || element.nombre, element.Pass || element.pass, element.Carnet || element.carnet);
-    }); 
-  }else{
-    alert("Hubo un error con el archivo: atributos no encontrados")
-    return
+      nuevoArbol.agregar(
+        element.Nombre || element.nombre,
+        element.Pass || element.pass,
+        element.Carnet || element.carnet
+      );
+      let nuevo = new nodoEstudiante(
+        element.Nombre || element.nombre,
+        element.Pass || element.pass,
+        element.Carnet || element.carnet
+      );
+      //console.log(typeof(element.carnet))
+      users.set(element.carnet, nuevo);
+    });
+  } else {
+    console.log("Hubo un error con el archivo: atributos no encontrados");
+    return;
   }
-  
+  localStorage.setItem("tablaHash", JSON.stringify(users));
   localStorage.setItem("arbol", JSON.stringify(nuevoArbol));
-
-  //motrar el recorrido in-orden en la tabla
+  mostrarEstudiantes(users);
+  console.log(nuevoArbol);
+  console.log(users);
+  /*//motrar el recorrido in-orden en la tabla
   let filas = document.querySelector("#datos");
   filas.innerHTML = recorridoInOrden(nuevoArbol.raiz);
-  alert("Archivo cargado con éxito");
+  console.log("Archivo cargado con éxito");*/
+}
+
+botonCerrar.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  localStorage.setItem("isLoggedIn", "false");
+  location.href = "index.html";
+});
+
+function mostrarEstudiantes(users) {
+  if (!users) {
+    return
+  }
+  for (let i = 0; i < users.data.length; i++) {
+    if (users.data[i]) {
+      let tr = document.createElement("tr");
+      let tdCarnet = document.createElement("td");
+      let tdNombre = document.createElement("td");
+      let tdPassword = document.createElement("td");
+
+      tdCarnet.innerHTML = users.data[i].carnet;
+      tdNombre.innerHTML = users.data[i].nombre;
+      tdPassword.innerHTML = users.data[i].passEncriptado;
+
+      tr.appendChild(tdCarnet);
+      tr.appendChild(tdNombre);
+      tr.appendChild(tdPassword);
+
+      tablaEstudiantes.appendChild(tr);
+    }
+  }
+}
+
+function mostrarPermisos(users) {
+  if (!users) {
+    return
+  }
+  for (let i = 0; i < users.data.length; i++) {
+    if (users.data[i]) {
+      let tr = document.createElement("tr");
+      let tdPropietario = document.createElement("td");
+      tdPropietario.innerHTML = users.data[i].carnet;
+      tr.appendChild(tdPropietario);
+      let nombreCarpeta = "/"
+      recorrerCarpetas(users.data[i].carpetaRaiz, tr, nombreCarpeta)
+    }
+  }
+}
+
+function recorrerCarpetas(nodo, tr, nombreCarpeta) {
+  //para recorrer cada archivo de la carpeta actual
+  for (const archivos of nodo.archivos) {
+    //para recorrer cada permiso
+    let tdArchivo = document.createElement("td");
+    tdArchivo.innerHTML = archivos.nombre;
+    let aux = archivos.primero;
+    while (aux != null) {
+      let tdDestino = document.createElement("td");
+      let tdPermiso = document.createElement("td");
+      let tdUbicacion = document.createElement("td")
+      tdDestino.innerHTML = aux.columna;
+      tdPermiso.innerHTML = aux.nombre;
+      tdUbicacion.innerHTML = nombreCarpeta 
+      tr.appendChild(tdDestino);
+      tr.appendChild(tdUbicacion);
+      tr.appendChild(tdArchivo);
+      tr.appendChild(tdPermiso);
+      
+      tablaPermisos.appendChild(tr);
+      let trNuevo = document.createElement("tr");
+      //console.log(tr.firstElementChild.childNodes[0].data)
+      let tdNuevo = document.createElement("td")
+      tdNuevo.innerHTML = tr.firstElementChild.childNodes[0].data
+      trNuevo.appendChild(tdNuevo);
+      tr = trNuevo
+      //console.log(tr)
+      aux = aux.siguiente;
+    }
+  }
+  for (const key in nodo.carpetas) {
+    nombreCarpeta += nodo.carpetas[key].nombre + "/"
+    recorrerCarpetas(nodo.carpetas[key], tr, nombreCarpeta);
+  }
 }
 
 function readFile(file) {
@@ -58,8 +170,8 @@ function readFile(file) {
   });
 }
 
-let botonMostrar = document.querySelector("#btnMostrar");
-botonMostrar.addEventListener("click", (e) => {
+/*
+  botonMostrar.addEventListener("click", (e) => {
   e.preventDefault();
   e.stopPropagation();
   let arbol = JSON.parse(localStorage.getItem("arbol"));
@@ -81,24 +193,9 @@ botonMostrar.addEventListener("click", (e) => {
   archivo.src = `https://quickchart.io/graphviz?graph=${codificada}`;
   console.log(cabeza);
 });
+*/
 
-function mostrarArbol(nodo) {
-  let cuerpo = "";
-  if (nodo != null) {
-    cuerpo += `${nodo.carnet}[label="${nodo.carnet}\\n${nodo.nombre}\\nAltura: ${nodo.altura}"]; \n`;
-    if (nodo.izquierdo != null) {
-      cuerpo += nodo.carnet + " -> " + nodo.izquierdo.carnet + ";\n";
-      cuerpo += mostrarArbol(nodo.izquierdo);
-    }
-    if (nodo.derecho != null) {
-      cuerpo += nodo.carnet + " -> " + nodo.derecho.carnet + ";\n";
-      cuerpo += mostrarArbol(nodo.derecho);
-    }
-  }
-  return cuerpo;
-}
-
-let botonRecorrido = document.querySelector("#btnRecorrido");
+/*
 botonRecorrido.addEventListener("click", (e) => {
   e.preventDefault();
   e.stopPropagation();
@@ -124,6 +221,23 @@ botonRecorrido.addEventListener("click", (e) => {
       break;
   }
 });
+*/
+
+function mostrarArbol(nodo) {
+  let cuerpo = "";
+  if (nodo != null) {
+    cuerpo += `${nodo.carnet}[label="${nodo.carnet}\\n${nodo.nombre}\\nAltura: ${nodo.altura}"]; \n`;
+    if (nodo.izquierdo != null) {
+      cuerpo += nodo.carnet + " -> " + nodo.izquierdo.carnet + ";\n";
+      cuerpo += mostrarArbol(nodo.izquierdo);
+    }
+    if (nodo.derecho != null) {
+      cuerpo += nodo.carnet + " -> " + nodo.derecho.carnet + ";\n";
+      cuerpo += mostrarArbol(nodo.derecho);
+    }
+  }
+  return cuerpo;
+}
 
 function recorridoInOrden(nodo) {
   let data = "";
@@ -180,11 +294,3 @@ function recorridoPreOrden(nodo) {
   }
   return data;
 }
-
-let botonCerrar = document.querySelector("#btnCerrarSesion");
-botonCerrar.addEventListener("click", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    localStorage.setItem("isLoggedIn", "false")
-    location.href = "index.html"
-});
