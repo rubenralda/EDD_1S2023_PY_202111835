@@ -1,4 +1,4 @@
-class nodoBloque {
+export class nodoBloque {
     constructor(index, fecha, emisor, receptor, mensaje, previousHash, hash) {
         this.valor = {
             'index': index,
@@ -10,11 +10,10 @@ class nodoBloque {
             'hash': hash
         }
         this.siguiente = null
-        this.anterior = null
     }
 }
 
-class Bloque {
+export class Bloque {
     constructor() {
         this.inicio = null
         this.bloques_creados = 0

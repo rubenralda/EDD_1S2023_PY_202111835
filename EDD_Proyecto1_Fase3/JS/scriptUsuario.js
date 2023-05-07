@@ -15,6 +15,7 @@ const btnReporteArchivos = document.querySelector("#btnArchivos");
 const btnPermisos = document.querySelector("#btnPermisos");
 const btnBitacora = document.querySelector("#btnBitacora");
 const btnRaiz = document.querySelector("#btnRaiz");
+const btnMensajes = document.querySelector('#btnMensajes');
 //const btnCompartidos = document.querySelector("#contenedorCompartidos");
 let contenedorCompartidos = document.getElementById("contenedorCompartidos");
 
@@ -403,6 +404,12 @@ btnRaiz.addEventListener("click", (e) => {
   //localStorage.setItem("arbol", JSON.stringify(arbol));
 });
 
+btnMensajes.addEventListener("click", (e) =>{
+  e.preventDefault();
+  localStorage.setItem("tablaHash", JSON.stringify(tablaHash));
+  location.href = "mensajeria.html";
+});
+
 function mostrarPermisos(users) {
   if (!users) {
     return;
@@ -455,14 +462,12 @@ function recorrerCarpetas(nodo) {
             reader.onload = function (event) {
               // Establecer el contenido del textarea
               resultado.value = event.target.result;
-              //console.log(resultado);
             };
             reader.readAsText(abrirArchivo(archivos.informacion, "text/plain"));
             break;
-          default: // es imagen
+          default://es imagen
             resultado = document.createElement("img");
             let fff = new File([abrirArchivo(archivos.informacion, "image/" + key)], archivos.nombre)
-            //console.log(fff)
             resultado.className = "card-img-top";
             mostrarArchivoEnImg(fff, resultado);
             break;
@@ -471,18 +476,7 @@ function recorrerCarpetas(nodo) {
         divTarjeta.appendChild(resultado);
         divTarjeta.appendChild(divBody);
         divColumna.appendChild(divTarjeta);
-        //console.log(divColumna);
         contenedorCompartidos.appendChild(divColumna);
-        /**
-         * contenedorCompartidos.innerHTML += `<div class="col">
-              <div class="card">
-                  <img src="img/tipo.png" class="card-img-top">
-                  <div class="card-body">
-                      <h5 class="card-title">${archivos.nombre}</h5>
-                  </div>
-              </div>
-          </div>`;
-         */
       }
       aux = aux.siguiente;
     }
