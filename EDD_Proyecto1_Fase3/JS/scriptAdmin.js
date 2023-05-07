@@ -97,6 +97,28 @@ btnMensajes.addEventListener("click", (e) => {
     reporteMensajes(bloque_actual)
     bloque_actual = bloque_actual.siguiente
   }
+  let texto = `digraph prueba{
+    fontname="Helvetica,Arial,sans-serif"
+    node [fontname="Helvetica,Arial,sans-serif", shape=box]
+    edge [fontname="Helvetica,Arial,sans-serif"]\n`;
+  let i = 0;
+  let conexion = "";
+  bloque_actual = bloque.inicio
+  while (bloque_actual != null) {
+    texto += `${i}[label= "TimeStamp: ${bloque_actual.valor['timestamp']}\\nEmisor: ${bloque_actual.valor['transmitter']}\\nReceptor: ${bloque_actual.valor['receiver']}\\nPreviousHash: ${bloque_actual.valor['previoushash']}"];\n`;
+    conexion += "" + i;
+    bloque_actual = bloque_actual.siguiente;
+    if (bloque_actual == null) {
+      break;
+    }
+    conexion += " -> ";
+    i++;
+  }
+  texto += conexion + "\n}";
+  let codificada = encodeURIComponent(texto);
+  window.open(`https://quickchart.io/graphviz?graph=${codificada}`, "_blank");
+  console.log(texto);
+  e.stopPropagation();
 });
 
 function reporteMensajes(bloque_actual) {
